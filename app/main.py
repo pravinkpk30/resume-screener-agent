@@ -12,6 +12,7 @@ The application will also handle file uploads and provide endpoints for resume p
 
 from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from app.parsepdf import parse_pdf
 from app.agents.resume_extractor import analyze_resume
 from app.agents.jd_extractor import analyze_jd
@@ -19,6 +20,22 @@ from app.agents.candidate_evaluation import evaluate_candidate
 import json
 
 app = FastAPI()
+
+# Enable CORS for local development (Vite default port 5173)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
 
 @app.post("/screening/")
 async def upload_resume(resume: UploadFile = File(...), jd: UploadFile = File(...)):
